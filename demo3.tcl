@@ -65,14 +65,15 @@ oo::class create tapa {
 		if { $y == $objetivo} {
 			set tapax [lindex [my getCentro $lienzo] 0]
 			if { $suspension > 0} {
+				if {$suspension == 100} {
+					$indicador crear $barra [lindex $data [expr ($indice + 1) % [llength $data]]]
+				}
 				set suspension [ expr $suspension - 1 ]
-				#Atención: dibuja y sobredibuja lo mismo
-				$indicador indicar $barra [lindex $data [expr ($indice + 1) % [llength $data]]]
 				$reloj dibujar $barra $tapax
 				$reloj restar $barra $tapax
 			} else {
 				set suspension 100
-				$indicador ocultar $barra
+				$indicador borrar $barra
 				$reloj reiniciar $barra $tapax
 				my avanzar
 				my mover $lienzo $barra
@@ -210,25 +211,16 @@ oo::class create indicador {
 		set margin_top 25
 		set centrox $cenx
 		set capacidad $cap
-		set wid_fondo [$lienzo create rect [expr $centrox - $ancho / 2] $margin_top [expr $centrox + $ancho / 2] [expr $margin_top + $alto] -fill white]
-		set wid_frente [$lienzo create rect [expr $centrox - $ancho / 2] $margin_top [expr $centrox + $ancho / 2] [expr $margin_top + $alto] -fill cyan]
-		my indicar $lienzo $niv
 	}
-	method indicar {lienzo niv} {
-		my variable wid_frente centrox ancho nivel capacidad
+	method crear {lienzo niv} {
+		my variable wid_frente wid_fondo centrox ancho alto margin_top
 		set p [expr $niv * $ancho / $capacidad]
-		$lienzo coords $wid_frente [expr ($centrox - $ancho / 2)] $margin_top [expr $centrox - $ancho / 2 + $p] [expr $margin_top + $alto]	
-		my mostrar $lienzo
+		set wid_fondo [$lienzo create rect [expr $centrox - $ancho / 2] $margin_top [expr $centrox + $ancho / 2] [expr $margin_top + $alto] -fill white]
+		set wid_frente [$lienzo create rect [expr $centrox - $ancho / 2] $margin_top [expr $centrox - $ancho / 2 + $p] [expr $margin_top + $alto] -fill cyan]
 	}
-	method mostrar {lienzo} {
+	method borrar {lienzo} {
 		my variable wid_frente wid_fondo
-		$lienzo raise $wid_frente $wid_fondo
-		$lienzo itemconfigure $wid_fondo -outline black
-	}
-	method ocultar {lienzo} {
-		my variable wid_frente wid_fondo
-		$lienzo raise $wid_fondo $wid_frente 
-		$lienzo itemconfigure $wid_fondo -outline white
+		$lienzo delete $wid_fondo $wid_frente 
 	}
 }
 
